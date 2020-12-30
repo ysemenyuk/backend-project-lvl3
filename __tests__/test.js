@@ -1,3 +1,5 @@
-test('test1', () => {
-  expect(1).toEqual(1);
+import half from '../index.js';
+
+test('half', () => {
+  expect(half(6)).toBe(3);
 });
