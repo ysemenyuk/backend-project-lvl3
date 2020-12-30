@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "[![Actions Status](https://github.com/ysemenyuk/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/ysemenyuk/backend-project-lvl3/actions)",
   "main": "index.js",
+  "bin": {
+    "page-loader": "bin/page-loader.js"
+  },
   "scripts": {
     "test": "npx -n --experimental-vm-modules jest"
   },
