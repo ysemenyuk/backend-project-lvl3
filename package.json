@@ -1,0 +1,37 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "[![Actions Status](https://github.com/ysemenyuk/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/ysemenyuk/backend-project-lvl3/actions)",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx -n --experimental-vm-modules jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysemenyuk/backend-project-lvl3.git"
+  },
+  "author": "yuriy.s",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ysemenyuk/backend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/ysemenyuk/backend-project-lvl3#readme",
+  "type": "module",
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
+  },
+  "dependencies": {
+    "commander": "^6.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.0",
+    "jest": "^26.6.3"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
