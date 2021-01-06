@@ -3,6 +3,9 @@ install: install-deps
 install-deps:
 	npm ci
 
+run:
+	page-loader -o ./page-loader https://page-loader.hexlet.repl.co/
+
 test:
 	npm test
 
