@@ -3,30 +3,75 @@ import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
 import os from 'os';
 import path from 'path';
-import { promises as fsp } from 'fs';
+import fs from 'fs';
 
 import pageLoader from '../src/index.js';
 
+const fsp = fs.promises;
 nock.disableNetConnect();
 axios.defaults.adapter = httpAdapter;
 
-let pathTmp;
-// const pathTmp = '__tmp__';
+const fullpathTestPage = path.resolve('__fixtures__/test-page.html');
+const fullpathScript = path.resolve('__fixtures__/test-files/script.js');
+const fullpathStyle = path.resolve('__fixtures__/test-files/style.css');
+const fullpathOtherPage = path.resolve('__fixtures__/test-files/other-page.html');
+const fullpathImg = path.resolve('__fixtures__/test-files/img.png');
+
+const fullpathExpectedPage = path.resolve('__fixtures__/expected.html');
+
+let tmpDir;
+// const tmpDir = '__tmp__';
 
 beforeEach(async () => {
-  pathTmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+  tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
 test('test1', async () => {
-  const fullpathExp = path.resolve('__fixtures__/expected.html');
-  const data = await fsp.readFile(fullpathExp, 'utf8');
+  const testPage = await fsp.readFile(fullpathTestPage, 'utf8');
+  const script = await fsp.readFile(fullpathScript, 'utf8');
+  const style = await fsp.readFile(fullpathStyle, 'utf8');
+  const otherPage = await fsp.readFile(fullpathOtherPage, 'utf8');
+  const img = await fsp.readFile(fullpathImg);
 
-  nock('http://test.ru').get('/page').reply(200, data);
+  nock('http://test.ru')
+    .get('/test-page')
+    .reply(200, testPage)
+    .get('/test-files/script.js')
+    .reply(200, script)
+    .get('/test-files/style.css')
+    .reply(200, style)
+    .get('/other-page.html')
+    .reply(200, otherPage)
+    .get('/test-files/img.png')
+    .reply(200, img);
 
-  await pageLoader('http://test.ru/page', pathTmp);
+  await pageLoader('http://test.ru/test-page', tmpDir);
 
-  const fullpathTmp = path.resolve(pathTmp, 'test-ru-page.html');
-  const downloaded = await fsp.readFile(fullpathTmp, 'utf8');
+  const expectedPage = await fsp.readFile(fullpathExpectedPage, 'utf8');
 
-  expect(downloaded).toEqual(data);
+  const fullpathTmpPage = path.resolve(tmpDir, 'test-ru-test-page.html');
+  const fullpathTmpScript = path.resolve(tmpDir, 'test-ru-test-page_files/script.js');
+  const fullpathTmpStyle = path.resolve(tmpDir, 'test-ru-test-page_files/style.css');
+  const fullpathTmpOtherPage = path.resolve(tmpDir, 'test-ru-test-page_files/other-page.html');
+  const fullpathTmpImg = path.resolve(tmpDir, 'test-ru-test-page_files/img.png');
+
+  const formattedPage = await fsp.readFile(fullpathTmpPage, 'utf8');
+  const downloadedScript = await fsp.readFile(fullpathTmpScript, 'utf8');
+  const downloadedStyle = await fsp.readFile(fullpathTmpStyle, 'utf8');
+  const downloadedOtherPage = await fsp.readFile(fullpathTmpOtherPage, 'utf8');
+  const downloadedImg = await fsp.readFile(fullpathTmpImg);
+
+  expect(formattedPage).toEqual(expectedPage);
+  expect(downloadedScript).toEqual(script);
+  expect(downloadedStyle).toEqual(style);
+  expect(downloadedOtherPage).toEqual(otherPage);
+  expect(downloadedImg).toEqual(img);
+});
+
+test('test2', async () => {
+  nock('http://test.ru')
+    .get('/test-page')
+    .reply(301, '');
+
+  await expect(pageLoader('http://test.ru/test-page', tmpDir)).rejects.toThrow();
 });

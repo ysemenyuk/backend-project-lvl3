@@ -26,7 +26,11 @@ const pageLoader = (request, outputPath = '') => {
     // .then((response) => fsp.writeFile(htmlInitFilePath, response.data))
     // .then(() => axios.get(request))
     .then((response) => {
-      console.log(response.status);
+      // console.log(response.status);
+      if (response.status !== 200) {
+        throw new Error(`response satus ${response.status}`);
+      }
+
       const $ = cheerio.load(response.data);
       // console.log($.html());
 
@@ -65,7 +69,9 @@ const pageLoader = (request, outputPath = '') => {
     .then(() => fsp.mkdir(filesDirPath))
     .then(() => {
       const imagesPromises = images.map((item) => {
-        const link = `${requestURL.protocol}//${requestURL.host}${item.fileUrl.path}`;
+        // const link = `${requestURL.protocol}//${requestURL.host}${item.fileUrl.path}`;
+        const link = encodeURI(`${requestURL.protocol}//${requestURL.host}${item.fileUrl.path}`);
+        // const encodedLink = encodeURI(link);
         console.log(1, link);
         return axios({
           method: 'get',
@@ -98,11 +104,13 @@ const pageLoader = (request, outputPath = '') => {
           });
       });
 
+      // return Promise.all([...imagesPromises]);
       return Promise.all([...imagesPromises, ...linksPromises, ...scriptsPromises]);
     })
 
     .catch((error) => {
-      console.log(error.message);
+      // console.log(error.message);
+      throw new Error(error.message);
     });
 
   return promise;
