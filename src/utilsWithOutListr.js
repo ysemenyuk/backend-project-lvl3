@@ -2,7 +2,6 @@ import cheerio from 'cheerio';
 import path from 'path';
 import axios from 'axios';
 import fs from 'fs';
-import Listr from 'listr';
 import debug from 'debug';
 import 'axios-debug-log';
 
@@ -53,30 +52,25 @@ export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
 };
 
 export const downloadFiles = (links, filesDirPath) => {
-  log('makeTasks for download files');
   const data = links.map((link) => {
     const url = encodeURI(link.fileUrl.href);
     const filePath = path.join(filesDirPath, link.fileName);
-
+    log('download -', url);
     if (link.tag === 'img') {
       // console.log(1, url);
-      const promise = axios.get(url, { responseType: 'stream' })
+      return axios.get(url, { responseType: 'stream' })
         .then((response) => response.data.pipe(fs.createWriteStream(filePath)))
-        .then(() => 'done')
         .catch((error) => {
           throw new Error(`download file from "${url}" ${error.message}`);
         });
-      return { title: url, task: () => promise };
     }
     // console.log(2, url);
-    const promise = axios.get(url)
+    return axios.get(url)
       .then((response) => fsp.writeFile(filePath, response.data))
       .catch((error) => {
-        throw new Error(`download file from "${url}" ${error.message}`);
+        throw new Error(`download file from "${url}"  ${error.message}`);
       });
-    return { title: url, task: () => promise };
   });
 
-  const tasks = new Listr(data, { concurrent: true });
-  return tasks.run();
+  return Promise.all(data);
 };

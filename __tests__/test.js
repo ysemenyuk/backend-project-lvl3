@@ -26,7 +26,7 @@ beforeEach(async () => {
   tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
-test('test1', async () => {
+test('Successful', async () => {
   const testPage = await fsp.readFile(fullpathTestPage, 'utf8');
   const script = await fsp.readFile(fullpathScript, 'utf8');
   const style = await fsp.readFile(fullpathStyle, 'utf8');
@@ -50,10 +50,10 @@ test('test1', async () => {
   const expectedPage = await fsp.readFile(fullpathExpectedPage, 'utf8');
 
   const fullpathTmpPage = path.resolve(tmpDir, 'test-ru-test-page.html');
-  const fullpathTmpScript = path.resolve(tmpDir, 'test-ru-test-page_files/script.js');
-  const fullpathTmpStyle = path.resolve(tmpDir, 'test-ru-test-page_files/style.css');
+  const fullpathTmpScript = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-script.js');
+  const fullpathTmpStyle = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-style.css');
   const fullpathTmpOtherPage = path.resolve(tmpDir, 'test-ru-test-page_files/other-page.html');
-  const fullpathTmpImg = path.resolve(tmpDir, 'test-ru-test-page_files/img.png');
+  const fullpathTmpImg = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-img.png');
 
   const formattedPage = await fsp.readFile(fullpathTmpPage, 'utf8');
   const downloadedScript = await fsp.readFile(fullpathTmpScript, 'utf8');
@@ -68,10 +68,18 @@ test('test1', async () => {
   expect(downloadedImg).toEqual(img);
 });
 
-test('test2', async () => {
+test('Error request fail', async () => {
   nock('http://test.ru')
-    .get('/test-page')
-    .reply(301, '');
+    .get('/page')
+    .reply(404, '');
 
-  await expect(pageLoader('http://test.ru/test-page', tmpDir)).rejects.toThrow();
+  await expect(pageLoader('http://test.ru/page', tmpDir)).rejects.toThrow('status code 404');
+});
+
+test('Error nonExistOutputPath', async () => {
+  nock('http://test.ru')
+    .get('/page')
+    .reply(200, 'data');
+
+  await expect(pageLoader('http://test.ru/page', 'nonExixstPath')).rejects.toThrow('no such file or directory');
 });
