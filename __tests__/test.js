@@ -19,8 +19,8 @@ const fullpathImg = path.resolve('__fixtures__/files/image.png');
 
 const fullpathExpectedPage = path.resolve('__fixtures__/expected.html');
 
-let tmpDir;
 // const tmpDir = '__tmp__';
+let tmpDir;
 
 beforeEach(async () => {
   tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
