@@ -22,12 +22,17 @@ export const getName = (url, type) => {
 };
 
 export const getFileName = (url) => {
-  // console.log(url);
-  // console.log(path.parse(url.pathname));
   const { dir, name, ext } = path.parse(url.pathname);
   const formattedName = formatName(`${url.hostname}/${dir}/${name}`);
-  // console.log(formattedName);
   return ext ? `${formattedName}${ext}` : `${formattedName}.html`;
+};
+
+export const loadPage = (request) => {
+  log('GET -', request);
+  return axios.get(request)
+    .catch((error) => {
+      throw new Error(`${error.message} - "${request}"`);
+    });
 };
 
 const tagsMapping = {
@@ -36,9 +41,9 @@ const tagsMapping = {
   script: 'src',
 };
 
-export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
+export const formatHtmlAndGetLinks = (html, requestURL, filesDirName) => {
   const links = [];
-  const $ = cheerio.load(response.data);
+  const $ = cheerio.load(html);
 
   Object.keys(tagsMapping).forEach((tag) => {
     $(tag).each((index, item) => {
@@ -56,7 +61,15 @@ export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
   return { html: $.html(), links };
 };
 
-export const downloadFiles = (links, filesDirPath) => {
+export const writeHtmlFile = (html, htmlFilePath, outputPath) => {
+  log('writeHtmlFile -', htmlFilePath);
+  return fsp.writeFile(htmlFilePath, html)
+    .catch((error) => {
+      throw new Error(`${error.code}: no such directory "${outputPath}"`);
+    });
+};
+
+export const downloadAndWriteFiles = (links, filesDirPath) => {
   log('makeTasks for download files');
   const data = links.map((link) => {
     // const url = encodeURI(link.fileUrl.href);
@@ -83,5 +96,6 @@ export const downloadFiles = (links, filesDirPath) => {
   });
 
   const tasks = new Listr(data, { concurrent: true });
-  return tasks.run();
+  log('download and write files');
+  return fsp.mkdir(filesDirPath).then(() => tasks.run());
 };
