@@ -11,20 +11,20 @@ const fsp = fs.promises;
 nock.disableNetConnect();
 axios.defaults.adapter = httpAdapter;
 
-const fullpathTestPage = path.resolve('__fixtures__/test-page.html');
-const fullpathScript = path.resolve('__fixtures__/test-files/script.js');
-const fullpathStyle = path.resolve('__fixtures__/test-files/style.css');
-const fullpathOtherPage = path.resolve('__fixtures__/test-files/other-page.html');
-const fullpathImg = path.resolve('__fixtures__/test-files/img.png');
+const fullpathTestPage = path.resolve('__fixtures__/page.html');
+const fullpathScript = path.resolve('__fixtures__/files/script.js');
+const fullpathStyle = path.resolve('__fixtures__/files/style.css');
+const fullpathOtherPage = path.resolve('__fixtures__/files/other-page.html');
+const fullpathImg = path.resolve('__fixtures__/files/image.png');
 
 const fullpathExpectedPage = path.resolve('__fixtures__/expected.html');
 
 let tmpDir;
 // const tmpDir = '__tmp__';
 
-beforeEach(async () => {
-  tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-});
+// beforeEach(async () => {
+//   tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+// });
 
 test('Successful', async () => {
   const testPage = await fsp.readFile(fullpathTestPage, 'utf8');
@@ -34,26 +34,26 @@ test('Successful', async () => {
   const img = await fsp.readFile(fullpathImg);
 
   nock('http://test.ru')
-    .get('/test-page')
+    .get('/page')
     .reply(200, testPage)
-    .get('/test-files/script.js')
+    .get('/files/script.js')
     .reply(200, script)
-    .get('/test-files/style.css')
+    .get('/files/style.css')
     .reply(200, style)
     .get('/other-page.html')
     .reply(200, otherPage)
-    .get('/test-files/img.png')
+    .get('/files/image.png')
     .reply(200, img);
 
-  await pageLoader('http://test.ru/test-page', tmpDir);
+  await pageLoader('http://test.ru/page', tmpDir);
 
   const expectedPage = await fsp.readFile(fullpathExpectedPage, 'utf8');
 
-  const fullpathTmpPage = path.resolve(tmpDir, 'test-ru-test-page.html');
-  const fullpathTmpScript = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-script.js');
-  const fullpathTmpStyle = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-style.css');
-  const fullpathTmpOtherPage = path.resolve(tmpDir, 'test-ru-test-page_files/other-page.html');
-  const fullpathTmpImg = path.resolve(tmpDir, 'test-ru-test-page_files/test-files-img.png');
+  const fullpathTmpPage = path.resolve(tmpDir, 'test-ru-page.html');
+  const fullpathTmpScript = path.resolve(tmpDir, 'test-ru-page_files/test-ru-files-script.js');
+  const fullpathTmpStyle = path.resolve(tmpDir, 'test-ru-page_files/test-ru-files-style.css');
+  const fullpathTmpOtherPage = path.resolve(tmpDir, 'test-ru-page_files/test-ru-other-page.html');
+  const fullpathTmpImg = path.resolve(tmpDir, 'test-ru-page_files/test-ru-files-image.png');
 
   const formattedPage = await fsp.readFile(fullpathTmpPage, 'utf8');
   const downloadedScript = await fsp.readFile(fullpathTmpScript, 'utf8');
@@ -70,10 +70,10 @@ test('Successful', async () => {
 
 test('Error request fail', async () => {
   nock('http://test.ru')
-    .get('/page')
+    .get('/not-exist-page')
     .reply(404, '');
 
-  await expect(pageLoader('http://test.ru/page', tmpDir)).rejects.toThrow('status code 404');
+  await expect(pageLoader('http://test.ru/not-exist-page', tmpDir)).rejects.toThrow('status code 404');
 });
 
 test('Error nonExistOutputPath', async () => {
@@ -81,5 +81,5 @@ test('Error nonExistOutputPath', async () => {
     .get('/page')
     .reply(200, 'data');
 
-  await expect(pageLoader('http://test.ru/page', 'nonExixstPath')).rejects.toThrow('no such file or directory');
+  await expect(pageLoader('http://test.ru/page', 'notExixstPath')).rejects.toThrow('no such file or directory');
 });
