@@ -22,9 +22,9 @@ const fullpathExpectedPage = path.resolve('__fixtures__/expected.html');
 let tmpDir;
 // const tmpDir = '__tmp__';
 
-// beforeEach(async () => {
-//   tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-// });
+beforeEach(async () => {
+  tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+});
 
 test('Successful', async () => {
   const testPage = await fsp.readFile(fullpathTestPage, 'utf8');

@@ -2,6 +2,3 @@ node_modules
 coverage
 __tmp__
 .vscode
-page-loader
-init-html
-test.js

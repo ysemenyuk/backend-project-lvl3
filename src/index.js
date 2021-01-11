@@ -5,7 +5,6 @@ import debug from 'debug';
 import 'axios-debug-log';
 
 import { getName, formatHtmlAndGetLinks, downloadFiles } from './utils.js';
-// import { getName, formatHtmlAndGetLinks, downloadFiles } from './utilsWithOutListr.js';
 
 const log = debug('page-loader');
 const fsp = fs.promises;
