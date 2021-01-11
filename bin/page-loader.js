@@ -9,9 +9,13 @@ program
   .arguments('<url>')
   .option('-o, --output [dir]', 'output dir (default "app/")')
   .action((url) => pageLoader(url, program.output)
-    .then((outputPath) => console.log(`Page was successfully downloaded into '${outputPath}'`))
+    .then((outputPath) => {
+      console.log(`Page was successfully downloaded into '${outputPath}'`);
+      process.exit();
+    })
     .catch((error) => {
       console.error(error.message);
-      throw new Error(error);
+      process.exit(1);
+      // throw new Error(error);
     }))
   .parse(process.argv);
