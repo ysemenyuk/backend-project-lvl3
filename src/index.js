@@ -20,18 +20,16 @@ const pageLoader = (request, outputPath = '/') => {
   log('make htmlFileName - ', htmlFileName);
   log('make filesDirName - ', filesDirName);
 
-  // const htmlInitFilePath = path.resolve(process.cwd(), 'init-html', htmlFileName);
   const htmlFilePath = path.resolve(process.cwd(), outputPath, htmlFileName);
   const filesDirPath = path.resolve(process.cwd(), outputPath, filesDirName);
 
   return Promise.resolve()
-    // .then(() => axios.get(request))
-    // .then((response) => fsp.writeFile(htmlInitFilePath, response.data))
     .then(() => {
       log('GET -', request);
       return axios.get(request)
         .catch((error) => {
-          throw new Error(`"${request}" ${error.message}`);
+          // console.log(error);
+          throw new Error(`${error.message} - "${request}"`);
         });
     })
     .then((response) => {
@@ -40,7 +38,11 @@ const pageLoader = (request, outputPath = '/') => {
 
       log('writeHtmlFile -', htmlFilePath);
       return fsp.writeFile(htmlFilePath, html)
-        .then(() => links);
+        .then(() => links)
+        .catch((error) => {
+          // console.log(error);
+          throw new Error(`${error.code}: no such file or directory "${outputPath}"`);
+        });
     })
     .then((links) => {
       log('mkdir -', filesDirPath);

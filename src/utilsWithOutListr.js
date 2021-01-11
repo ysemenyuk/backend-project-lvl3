@@ -39,11 +39,13 @@ export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
 
   Object.keys(tagsMapping).forEach((tag) => {
     $(tag).each((index, item) => {
-      const fileUrl = new URL($(item).attr(tagsMapping[tag]), requestURL.origin);
-      if (fileUrl.origin === requestURL.origin) {
-        const fileName = getFileName(fileUrl);
-        links.push({ tag, fileName, fileUrl });
-        $(tag).eq(index).attr(tagsMapping[tag], `${filesDirName}/${fileName}`);
+      if ($(item).attr(tagsMapping[tag])) {
+        const fileUrl = new URL($(item).attr(tagsMapping[tag]), requestURL.origin);
+        if (fileUrl.origin === requestURL.origin) {
+          const fileName = getFileName(fileUrl);
+          links.push({ tag, fileName, fileUrl });
+          $(tag).eq(index).attr(tagsMapping[tag], `${filesDirName}/${fileName}`);
+        }
       }
     });
   });

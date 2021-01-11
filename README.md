@@ -28,14 +28,14 @@ Download html page into local directory
     page-loader --output outputDir
 
 #### asciinema
-<a href="https://asciinema.org/a/3Yh4VXUGCNIphzbaBCsqtkTnt" target="_blank">step 1 download html</a>
+<a href="https://asciinema.org/a/3Yh4VXUGCNIphzbaBCsqtkTnt" target="_blank">step 1 (download html)</a>
 
-<a href="https://asciinema.org/a/VHLHnD6UzlwX9kahUrnnOg3Ir" target="_blank">step 2 download images and change links in html</a>
+<a href="https://asciinema.org/a/VHLHnD6UzlwX9kahUrnnOg3Ir" target="_blank">step 2 (download images and change links in html)</a>
 
-<a href="https://asciinema.org/a/E3lqmqCCEMkTnVZ7l48VyPAlg" target="_blank">step 3 download all assets and change links in html</a>
+<a href="https://asciinema.org/a/E3lqmqCCEMkTnVZ7l48VyPAlg" target="_blank">step 3 (download all assets and change links in html)</a>
 
-<a href="https://asciinema.org/a/K2jgrX5GU1WCduY8ELYtvLArV" target="_blank">step 4 add dubug</a>
+<a href="https://asciinema.org/a/K2jgrX5GU1WCduY8ELYtvLArV" target="_blank">step 4 (add dubug)</a>
 
-<a href="https://asciinema.org/a/TEaQS65Rqf1gPSYKtQRPXqIuL" target="_blank">step 5 catch error</a>
+<a href="https://asciinema.org/a/TEaQS65Rqf1gPSYKtQRPXqIuL" target="_blank">step 5 (catch error)</a>
 
-<a href="https://asciinema.org/a/pJaXhWTeXWuTEE6SdVQ9FOUsg" target="_blank">step 6 add listr</a>
+<a href="https://asciinema.org/a/pJaXhWTeXWuTEE6SdVQ9FOUsg" target="_blank">step 6 (add listr)</a>

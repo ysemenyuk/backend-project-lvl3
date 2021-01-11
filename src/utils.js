@@ -22,8 +22,10 @@ export const getName = (url, type) => {
 };
 
 export const getFileName = (url) => {
+  // console.log(url);
+  // console.log(path.parse(url.pathname));
   const { dir, name, ext } = path.parse(url.pathname);
-  const formattedName = formatName(`${dir}/${name}`);
+  const formattedName = formatName(`${url.hostname}/${dir}/${name}`);
   // console.log(formattedName);
   return ext ? `${formattedName}${ext}` : `${formattedName}.html`;
 };
@@ -40,11 +42,13 @@ export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
 
   Object.keys(tagsMapping).forEach((tag) => {
     $(tag).each((index, item) => {
-      const fileUrl = new URL($(item).attr(tagsMapping[tag]), requestURL.origin);
-      if (fileUrl.origin === requestURL.origin) {
-        const fileName = getFileName(fileUrl);
-        links.push({ tag, fileName, fileUrl });
-        $(tag).eq(index).attr(tagsMapping[tag], `${filesDirName}/${fileName}`);
+      if ($(item).attr(tagsMapping[tag])) {
+        const fileUrl = new URL($(item).attr(tagsMapping[tag]), requestURL.origin);
+        if (fileUrl.origin === requestURL.origin) {
+          const fileName = getFileName(fileUrl);
+          links.push({ tag, fileName, fileUrl });
+          $(tag).eq(index).attr(tagsMapping[tag], `${filesDirName}/${fileName}`);
+        }
       }
     });
   });
@@ -55,7 +59,8 @@ export const formatHtmlAndGetLinks = (response, requestURL, filesDirName) => {
 export const downloadFiles = (links, filesDirPath) => {
   log('makeTasks for download files');
   const data = links.map((link) => {
-    const url = encodeURI(link.fileUrl.href);
+    // const url = encodeURI(link.fileUrl.href);
+    const url = link.fileUrl.href;
     const filePath = path.join(filesDirPath, link.fileName);
 
     if (link.tag === 'img') {
