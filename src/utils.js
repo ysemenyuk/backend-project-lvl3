@@ -88,7 +88,7 @@ export const downloadAndWriteFiles = (links, filesDirPath) => {
     }
     // console.log(2, url);
     const promise = axios.get(url)
-      .then((response) => fsp.writeFile(filePath, response.data.trim()))
+      .then((response) => fsp.writeFile(filePath, response.data))
       .catch((error) => {
         throw new Error(`download file from "${url}" ${error.message}`);
       });
