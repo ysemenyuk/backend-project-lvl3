@@ -2,3 +2,4 @@ node_modules
 coverage
 __tmp__
 .vscode
+tmp

@@ -7,7 +7,7 @@ run:
 	page-loader --output tmp https://page-loader.hexlet.repl.co/
 
 run-log:
-	DEBUG=page-loader page-loader --output tmp https://page-loader.hexlet.repl.co/
+	DEBUG=page-loader page-loader --output tmp http://flamestop.ru/little-server1
 
 test:
 	npm test

@@ -6,7 +6,7 @@ import debug from 'debug';
 import 'axios-debug-log';
 import Listr from 'listr';
 
-import { makeName, makeFileName, isDirExist } from './utils.js';
+import { makeName, makeFileName } from './utils.js';
 
 const log = debug('page-loader');
 const fsp = fs.promises;
@@ -48,7 +48,10 @@ const downloadAndWriteAssets = (links, filesDirPath) => {
       .catch((error) => {
         throw new Error(`${error.message} - "${url}"`);
       })
-      .then((response) => fsp.writeFile(filePath, response.data));
+      .then((response) => fsp.writeFile(filePath, response.data))
+      .catch((error) => {
+        throw error;
+      });
 
     return { title: url, task: () => promise };
   });
@@ -58,13 +61,12 @@ const downloadAndWriteAssets = (links, filesDirPath) => {
   log('download and write files');
   // return fsp.mkdir(filesDirPath).then(() => tasks.run());
 
-  // return fsp.mkdir(filesDirPath)
-  //   .then(() => tasks.run())
-  //   .catch(() => tasks.run());
-
-  return fsp.access(filesDirPath)
+  return fsp.mkdir(filesDirPath)
     .then(() => tasks.run())
-    .catch(() => fsp.mkdir(filesDirPath).then(() => tasks.run()));
+    .catch(() => tasks.run())
+    .catch((error) => {
+      throw error;
+    });
 };
 
 const pageLoader = (request, outputPath = process.cwd()) => {
@@ -79,19 +81,22 @@ const pageLoader = (request, outputPath = process.cwd()) => {
   const htmlFilePath = path.resolve(outputPath, htmlFileName);
   const filesDirPath = path.resolve(outputPath, filesDirName);
 
+  log('GET - ', request);
   return axios.get(request)
     .catch((error) => {
       throw new Error(`${error.message} - "${request}"`);
     })
     .then((page) => {
       const { html, links } = formatHtmlAndGetLinks(page.data, requestURL, filesDirName);
-      return isDirExist(outputPath)
-        .then(() => fsp.writeFile(htmlFilePath, html))
-        .then(() => downloadAndWriteAssets(links, filesDirPath));
+      return fsp.writeFile(htmlFilePath, html)
+        .then(() => downloadAndWriteAssets(links, filesDirPath))
+        .catch((error) => {
+          throw error;
+        });
     })
     .then(() => ({ htmlFilePath }))
     .catch((error) => {
-      throw new Error(error);
+      throw error;
     });
 };
 

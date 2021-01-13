@@ -71,5 +71,5 @@ test('Error nonExistOutputPath', async () => {
     .get('/page')
     .reply(200, 'data');
 
-  await expect(pageLoader('http://test.ru/page', 'notExixstPath')).rejects.toThrow('no such directory');
+  await expect(pageLoader('http://test.ru/page', 'notExixstPath')).rejects.toThrow('no such file or directory');
 });
