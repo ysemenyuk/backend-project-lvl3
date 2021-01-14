@@ -1,7 +1,4 @@
-import fs from 'fs';
 import path from 'path';
-
-const fsp = fs.promises;
 
 const nameTypesMapping = {
   html: '.html',
@@ -20,8 +17,3 @@ export const makeFileName = (url) => {
   const formattedName = formatName(`${url.hostname}/${dir}/${name}`);
   return ext ? `${formattedName}${ext}` : `${formattedName}.html`;
 };
-
-export const isDirExist = (pathname) => fsp.access(pathname)
-  .catch((error) => {
-    throw new Error(`${error.code}: no such directory "${pathname}"`);
-  });
