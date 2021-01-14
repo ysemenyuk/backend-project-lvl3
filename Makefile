@@ -4,7 +4,7 @@ install-deps:
 	npm ci
 
 run:
-	page-loader --output tmp https://ysemenyuk.github.io/
+	page-loader --output tmp https://page-loader.hexlet.repl.co/
 
 run-log:
 	DEBUG=page-loader page-loader --output tmp https://ysemenyuk.github.io/
