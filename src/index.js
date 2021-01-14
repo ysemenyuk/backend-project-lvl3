@@ -18,8 +18,6 @@ const tagsMapping = {
 };
 
 const makeHtmlAndGetLinks = (html, requestURL, filesDirName) => {
-  log('get links for download assets');
-  log('make html file with local links');
   const links = [];
   const $ = cheerio.load(html);
 
@@ -39,51 +37,61 @@ const makeHtmlAndGetLinks = (html, requestURL, filesDirName) => {
   return { html: $.html(), links };
 };
 
-const downloadAndWriteAssets = (links, filesDirPath) => {
+const makeTasksForAssets = (links, filesDirPath) => {
   const data = links.map((link) => {
     // const url = encodeURI(link.fileUrl.href);
     const url = link.fileUrl.href;
     const filePath = path.join(filesDirPath, link.fileName);
     const promise = axios.get(url, { responseType: 'arraybuffer' })
-      .then((response) => fsp.writeFile(filePath, response.data));
+      .then((response) => fsp.writeFile(filePath, response.data))
+      .catch((e) => console.log(e.message));
 
     return { title: url, task: () => promise };
   });
-
   const tasks = new Listr(data, { concurrent: true });
-  log('download and write assets');
-
-  return fsp.mkdir(filesDirPath)
-    .then(() => log('make directory for assets (if not exists) -', filesDirPath))
-    .catch(() => log('directory for assets already exist -', filesDirPath))
-    .then(() => log('download assets into -', filesDirPath))
-    .finally(() => tasks.run());
+  return tasks;
 };
 
 const pageLoader = (request, outputPath = process.cwd()) => {
   const requestURL = new URL(request);
   const fullOutputPath = path.resolve(outputPath);
-  log('incoming request -', request);
-  log('output path -', fullOutputPath);
 
   const htmlFileName = makeName(requestURL, 'html');
   const filesDirName = makeName(requestURL, 'files');
-  log('making name for html file -', htmlFileName);
-  log('making name for assets directory -', filesDirName);
 
   const htmlFilePath = path.join(fullOutputPath, htmlFileName);
   const filesDirPath = path.join(fullOutputPath, filesDirName);
 
-  log('GET - ', request);
-  return axios.get(request)
-    .then((page) => {
-      const { html, links } = makeHtmlAndGetLinks(page.data, requestURL, filesDirName);
-      log('Write hmlt file into -', htmlFilePath);
-      return fsp.writeFile(htmlFilePath, html)
-        .then(() => downloadAndWriteAssets(links, filesDirPath));
+  log('incoming request -', request);
+  log('output path -', fullOutputPath);
+
+  let assetsLinks;
+
+  return fsp.access(fullOutputPath)
+    .then(() => {
+      log('GET request -', request);
+      return axios.get(request);
     })
-    .then(() => log('Page was successfully downloaded into -', fullOutputPath))
-    .then(() => ({ fullOutputPath }))
+    .then((page) => {
+      log('response status -', page.status);
+      const { html, links } = makeHtmlAndGetLinks(page.data, requestURL, filesDirName);
+      assetsLinks = links;
+      log('Writing hmlt file into -', htmlFilePath);
+      return fsp.writeFile(htmlFilePath, html);
+    })
+    .then(() => {
+      log('making directory for assets (if not exists) -', filesDirPath);
+      return fsp.access(filesDirPath).catch(() => fsp.mkdir(filesDirPath));
+    })
+    .then(() => {
+      log('Downloading assets into -', filesDirPath);
+      const tasks = makeTasksForAssets(assetsLinks, filesDirPath);
+      return tasks.run();
+    })
+    .then(() => {
+      log('Page was successfully downloaded into -', fullOutputPath);
+      return { fullOutputPath };
+    })
     .catch((error) => {
       throw error;
     });
