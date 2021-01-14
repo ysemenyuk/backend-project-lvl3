@@ -9,7 +9,7 @@ program
   .arguments('<url>')
   .option('-o, --output [dir]', 'output dir', process.cwd())
   .action((url) => pageLoader(url, program.output)
-    .then(({ htmlFilePath }) => console.log(`Page was successfully downloaded into '${htmlFilePath}'`))
+    .then(({ fullOutputPath }) => console.log(`Page was successfully downloaded into '${fullOutputPath}'`))
     .catch((error) => {
       console.error(error.message);
       process.exit(1);

@@ -4,10 +4,10 @@ install-deps:
 	npm ci
 
 run:
-	page-loader --output tmp https://page-loader.hexlet.repl.co/
+	page-loader --output tmp https://ysemenyuk.github.io/
 
 run-log:
-	DEBUG=page-loader page-loader --output tmp http://flamestop.ru/little-server1
+	DEBUG=page-loader page-loader --output tmp https://ysemenyuk.github.io/
 
 test:
 	npm test
