@@ -47,7 +47,7 @@ const makeTasksForAssets = (links, filesDirPath) => {
       task: (ctx, task) => axios.get(url, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(filePath, response.data))
         .catch((err) => {
-          ctx[err.message] = url;
+          ctx[url] = err.message;
           task.skip(err.message);
         }),
     };
