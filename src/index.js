@@ -71,7 +71,6 @@ const pageLoader = (request, outputPath = process.cwd()) => {
   let assetsLinks;
 
   return fsp.access(fullOutputPath)
-    .catch(() => fsp.mkdir(fullOutputPath))
     .then(() => {
       log('GET request -', request);
       return axios.get(request);
@@ -85,7 +84,7 @@ const pageLoader = (request, outputPath = process.cwd()) => {
     })
     .then(() => {
       log('making directory for assets -', filesDirPath);
-      return fsp.access(filesDirPath).catch(() => fsp.mkdir(filesDirPath));
+      return fsp.mkdir(filesDirPath);
     })
     .then(() => {
       log('Downloading assets into -', filesDirPath);
