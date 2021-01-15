@@ -47,7 +47,6 @@ const makeTasksForAssets = (links, filesDirPath) => {
       task: (ctx, task) => axios.get(url, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(filePath, response.data))
         .catch((err) => {
-          ctx[url] = err.message;
           task.skip(err.message);
         }),
     };
@@ -72,6 +71,7 @@ const pageLoader = (request, outputPath = process.cwd()) => {
   let assetsLinks;
 
   return fsp.access(fullOutputPath)
+    .catch(() => fsp.mkdir(fullOutputPath))
     .then(() => {
       log('GET request -', request);
       return axios.get(request);
@@ -85,14 +85,14 @@ const pageLoader = (request, outputPath = process.cwd()) => {
     })
     .then(() => {
       log('making directory for assets -', filesDirPath);
-      return fsp.mkdir(filesDirPath);
+      return fsp.access(filesDirPath).catch(() => fsp.mkdir(filesDirPath));
     })
     .then(() => {
       log('Downloading assets into -', filesDirPath);
       const tasks = makeTasksForAssets(assetsLinks, filesDirPath);
-      return tasks.run({});
+      return tasks.run();
     })
-    .then((fails) => ({ fullOutputPath, fails }));
+    .then(() => ({ fullOutputPath }));
 };
 
 export default pageLoader;
