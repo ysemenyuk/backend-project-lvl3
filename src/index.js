@@ -17,22 +17,24 @@ const tagsMapping = {
   script: 'src',
 };
 
-const makeHtmlAndGetLinks = (html, requestURL, filesDirName) => {
-  const links = [];
+const makeHtmlAndAssetsLinks = (html, requestURL, filesDirName) => {
   const $ = cheerio.load(html);
-
-  Object.keys(tagsMapping).forEach((tag) => {
-    $(tag).each((index, item) => {
-      if ($(item).attr(tagsMapping[tag])) {
-        const fileUrl = new URL($(item).attr(tagsMapping[tag]), requestURL.origin);
-        if (fileUrl.origin === requestURL.origin) {
+  const links = Object.entries(tagsMapping)
+    .flatMap(([tagName, attrName]) => {
+      const tagColl = [...$(tagName)];
+      return tagColl
+        .filter((item) => $(item).attr(attrName))
+        .map((item) => {
+          const fileUrl = new URL($(item).attr(attrName), requestURL.origin);
+          return { item, fileUrl };
+        })
+        .filter(({ fileUrl }) => fileUrl.origin === requestURL.origin)
+        .map(({ item, fileUrl }) => {
           const fileName = makeFileName(fileUrl);
-          links.push({ fileName, fileUrl: fileUrl.toString() });
-          $(tag).eq(index).attr(tagsMapping[tag], `${filesDirName}/${fileName}`);
-        }
-      }
+          $(item).attr(attrName, `${filesDirName}/${fileName}`);
+          return { fileName, fileUrl: fileUrl.toString() };
+        });
     });
-  });
 
   return { html: $.html(), links };
 };
@@ -77,7 +79,8 @@ const pageLoader = (request, outputPath = process.cwd()) => {
     })
     .then((page) => {
       log('response answer code -', page.status);
-      const { html, links } = makeHtmlAndGetLinks(page.data, requestURL, filesDirName);
+      // makeHtmlAndGetLinks(page.data, requestURL, filesDirName);
+      const { html, links } = makeHtmlAndAssetsLinks(page.data, requestURL, filesDirName);
       assetsLinks = links;
       log('writing hmlt file into -', htmlFilePath);
       return fsp.writeFile(htmlFilePath, html);
