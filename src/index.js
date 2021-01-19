@@ -19,30 +19,31 @@ const tagsMapping = {
 
 const makeHtmlAndAssetsLinks = (html, requestURL, filesDirName) => {
   const $ = cheerio.load(html);
-  const links = Object.entries(tagsMapping)
-    .flatMap(([tagName, attrName]) => {
-      const tagColl = [...$(tagName)];
-      return tagColl
-        .filter((item) => $(item).attr(attrName))
-        .map((item) => {
-          const fileUrl = new URL($(item).attr(attrName), requestURL.origin);
-          return { item, fileUrl };
+  const localLinks = [];
+  Object.entries(tagsMapping)
+    .forEach(([tagName, attrName]) => {
+      const tagElements = [...$(tagName)];
+      const tagLocalLinks = tagElements
+        .filter((element) => $(element).attr(attrName))
+        .map((element) => {
+          const fileUrl = new URL($(element).attr(attrName), requestURL.origin);
+          return { element, fileUrl };
         })
-        .filter(({ fileUrl }) => fileUrl.origin === requestURL.origin)
-        .map(({ item, fileUrl }) => {
-          const fileName = makeFileName(fileUrl);
-          $(item).attr(attrName, `${filesDirName}/${fileName}`);
-          return { fileName, fileUrl: fileUrl.toString() };
-        });
+        .filter(({ fileUrl }) => fileUrl.origin === requestURL.origin);
+
+      tagLocalLinks.forEach(({ element, fileUrl }) => {
+        const fileName = makeFileName(fileUrl);
+        localLinks.push({ fileName, fileUrl });
+        $(element).attr(attrName, `${filesDirName}/${fileName}`);
+      });
     });
 
-  return { html: $.html(), links };
+  return { html: $.html(), localLinks };
 };
 
-const makeTasksForAssets = (links, filesDirPath) => {
-  const tasks = links.map((link) => {
-    // const url = encodeURI(link.fileUrl);
-    const url = link.fileUrl;
+const makeTasksForAssets = (localLinks, filesDirPath) => {
+  const tasks = localLinks.map((link) => {
+    const url = (link.fileUrl).toString();
     const filePath = path.join(filesDirPath, link.fileName);
     return {
       title: `Downloading - ${url}`,
@@ -79,9 +80,8 @@ const pageLoader = (request, outputPath = process.cwd()) => {
     })
     .then((page) => {
       log('response answer code -', page.status);
-      // makeHtmlAndGetLinks(page.data, requestURL, filesDirName);
-      const { html, links } = makeHtmlAndAssetsLinks(page.data, requestURL, filesDirName);
-      assetsLinks = links;
+      const { html, localLinks } = makeHtmlAndAssetsLinks(page.data, requestURL, filesDirName);
+      assetsLinks = localLinks;
       log('writing hmlt file into -', htmlFilePath);
       return fsp.writeFile(htmlFilePath, html);
     })

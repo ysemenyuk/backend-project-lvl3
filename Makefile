@@ -7,7 +7,7 @@ run:
 	page-loader --output tmp https://ysemenyuk.github.io/
 
 run-log:
-	DEBUG=page-loader page-loader --output tmp https://ysemenyuk.github.io/  https://page-loader.hexlet.repl.co/
+	DEBUG=page-loader page-loader --output tmp https://ysemenyuk.github.io/
 
 test:
 	npm test
